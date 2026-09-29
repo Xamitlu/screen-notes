@@ -1,1 +1,1523 @@
-hi
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#5A2828">
+<title>Screen Notes</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Screen Notes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Google Identity Services (for Drive sign-in) -->
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+  :root{
+    --paper:#F3F2ED;
+    --paper-raised:#FBFAF6;
+    --ink:#17150F;
+    --ink-soft:#6B655A;
+    --ink-faint:#9A9488;
+    --oxblood:#5A2828;
+    --oxblood-bright:#7A3636;
+    --brass:#9A7838;
+    --profit:#3F6B52;
+    --rule:#D9D5C9;
+    --rule-strong:#C4BFB2;
+    --serif:'Fraunces',Georgia,serif;
+    --read:'Newsreader',Georgia,serif;
+    --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--read);
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  ::selection{background:var(--oxblood);color:var(--paper);}
+  a{color:inherit;}
+  button{font-family:inherit;cursor:pointer;}
+  input,textarea,select{font-family:inherit;}
+
+  .wrap{max-width:980px;margin:0 auto;padding:0 28px;}
+
+  /* ---------- masthead ---------- */
+  .masthead{
+    border-bottom:1.5px solid var(--ink);
+    padding:34px 0 22px;
+    margin-bottom:0;
+  }
+  .masthead-inner{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+  .eyebrow{
+    font-family:var(--mono);font-size:.66rem;letter-spacing:.26em;
+    text-transform:uppercase;color:var(--ink-soft);margin:0 0 8px;
+  }
+  .wordmark{
+    font-family:var(--serif);font-weight:500;font-size:2.5rem;line-height:.95;
+    letter-spacing:-.01em;margin:0;cursor:pointer;
+    font-optical-sizing:auto;
+  }
+  .masthead-meta{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--ink-faint);text-align:right;line-height:1.9;}
+
+  /* ---------- sync bar ---------- */
+  .syncbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    padding:10px 0 0;margin-bottom:34px;font-family:var(--mono);font-size:.7rem;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);}
+  .syncdot{width:8px;height:8px;border-radius:50%;background:var(--ink-faint);flex-shrink:0;}
+  .syncdot.ok{background:var(--profit);}
+  .syncdot.warn{background:var(--oxblood-bright);}
+  .syncdot.busy{background:var(--brass);animation:pulse 1s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:.35;}50%{opacity:1;}}
+  .synctext{color:var(--ink-soft);}
+  .syncbar .sync-actions{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap;}
+  .minibtn{font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;
+    background:none;border:1px solid var(--rule-strong);color:var(--ink-soft);padding:6px 11px;border-radius:0;
+    transition:all .15s ease;}
+  .minibtn:hover{border-color:var(--ink);color:var(--ink);}
+  .minibtn.accent{border-color:var(--oxblood);color:var(--oxblood);}
+  .minibtn.accent:hover{background:var(--oxblood);color:var(--paper);}
+  .drive-link{color:var(--ink-faint);text-decoration:none;border-bottom:1px dotted var(--rule-strong);}
+  .drive-link:hover{color:var(--oxblood);border-bottom-color:var(--oxblood);}
+
+  /* ---------- buttons ---------- */
+  .btn{
+    font-family:var(--mono);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;
+    background:none;border:1px solid var(--rule-strong);color:var(--ink);
+    padding:9px 16px;border-radius:0;transition:all .15s ease;white-space:nowrap;
+  }
+  .btn:hover{border-color:var(--ink);background:var(--ink);color:var(--paper);}
+  .btn-primary{background:var(--oxblood);border-color:var(--oxblood);color:var(--paper);}
+  .btn-primary:hover{background:var(--oxblood-bright);border-color:var(--oxblood-bright);color:var(--paper);}
+  .btn-ghost{border-color:transparent;padding-left:0;padding-right:14px;}
+  .btn-ghost:hover{background:none;color:var(--oxblood);border-color:transparent;}
+
+  /* ---------- controls bar ---------- */
+  .controls{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:8px;}
+  .search{
+    flex:1;min-width:200px;position:relative;
+  }
+  .search input{
+    width:100%;background:var(--paper-raised);border:1px solid var(--rule);
+    padding:12px 14px 12px 38px;font-size:1rem;color:var(--ink);border-radius:0;
+    font-family:var(--read);
+  }
+  .search input:focus{outline:none;border-color:var(--oxblood);}
+  .search::before{
+    content:"";position:absolute;left:14px;top:50%;width:13px;height:13px;
+    transform:translateY(-50%) rotate(-45deg);
+    border:1.5px solid var(--ink-soft);border-radius:50% 50% 50% 0;
+  }
+  select.filter{
+    background:var(--paper-raised);border:1px solid var(--rule);color:var(--ink);
+    padding:12px 14px;font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;
+    text-transform:uppercase;border-radius:0;
+  }
+  select.filter:focus{outline:none;border-color:var(--oxblood);}
+
+  .count-line{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--ink-faint);margin:26px 0 4px;
+    display:flex;align-items:center;gap:10px;}
+  .count-line::after{content:"";flex:1;height:1px;background:var(--rule);}
+
+  /* ---------- index (library list) ---------- */
+  .index{list-style:none;margin:0;padding:0;}
+  .index-row{
+    display:grid;grid-template-columns:auto 1fr auto;gap:20px;align-items:baseline;
+    padding:20px 6px;border-bottom:1px solid var(--rule);cursor:pointer;
+    transition:background .15s ease,padding .15s ease;
+  }
+  .index-row:hover{background:var(--paper-raised);padding-left:14px;padding-right:14px;}
+  .row-year{font-family:var(--mono);font-size:.82rem;color:var(--ink-soft);letter-spacing:.03em;padding-top:6px;}
+  .row-main{min-width:0;}
+  .row-title{font-family:var(--serif);font-weight:500;font-size:1.5rem;line-height:1.15;
+    letter-spacing:-.005em;font-optical-sizing:auto;}
+  .row-title .tv-tag{font-family:var(--mono);font-size:.58rem;letter-spacing:.16em;
+    vertical-align:middle;color:var(--paper);background:var(--ink-soft);
+    padding:2px 6px;margin-left:10px;text-transform:uppercase;position:relative;top:-3px;}
+  .row-sub{font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--ink-faint);margin-top:7px;}
+  .row-sub .dir{color:var(--ink-soft);}
+  .row-score{font-family:var(--mono);font-weight:500;font-size:1.15rem;color:var(--brass);
+    text-align:right;padding-top:4px;white-space:nowrap;}
+  .row-score .unit{font-size:.6rem;color:var(--ink-faint);letter-spacing:.05em;}
+  .row-score.none{color:var(--ink-faint);font-size:.9rem;}
+
+  /* ---------- entry page ---------- */
+  .page{animation:rise .4s cubic-bezier(.2,.7,.2,1);}
+  @keyframes rise{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+  .page-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;gap:16px;}
+  .page-actions{display:flex;gap:10px;}
+  .page-head{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:start;
+    border-bottom:2px solid var(--ink);padding-bottom:20px;margin-bottom:22px;}
+  .page-title{font-family:var(--serif);font-weight:500;font-size:clamp(2.3rem,6vw,3.9rem);
+    line-height:.98;letter-spacing:-.015em;margin:0;font-optical-sizing:auto;}
+  .page-score{text-align:center;flex-shrink:0;padding-top:8px;}
+  .page-score .num{font-family:var(--mono);font-weight:500;font-size:2.4rem;color:var(--brass);line-height:1;}
+  .page-score .lbl{font-family:var(--mono);font-size:.58rem;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--ink-faint);margin-top:8px;}
+  .page-score.none .num{color:var(--rule-strong);}
+  .page-poster{float:right;width:132px;height:198px;object-fit:cover;display:block;
+    margin:2px 0 20px 30px;background:var(--rule);
+    border:1px solid var(--rule-strong);box-shadow:0 8px 22px rgba(23,21,15,.18);}
+
+  .slate{font-family:var(--mono);font-size:.76rem;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--ink-soft);display:flex;flex-wrap:wrap;gap:0 8px;align-items:center;margin-bottom:6px;}
+  .slate .sep{color:var(--rule-strong);}
+
+  .credits{display:grid;grid-template-columns:auto 1fr;gap:9px 22px;margin:2px 0 36px;align-items:baseline;}
+  .credits dt{font-family:var(--mono);font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--ink-faint);padding-top:2px;white-space:nowrap;}
+  .credits dd{margin:0;font-family:var(--read);font-size:1.04rem;color:var(--ink);line-height:1.35;}
+
+  .finance{display:flex;gap:48px;flex-wrap:wrap;align-items:baseline;}
+  .finance .fig .k{font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-faint);margin-bottom:7px;}
+  .finance .fig .val{font-family:var(--mono);font-weight:500;font-size:1.5rem;color:var(--ink);letter-spacing:.01em;}
+  .finance .fig .val.mult{color:var(--ink-soft);}
+  .finance .fig .val.profit{color:var(--profit);}
+  .finance .fig .val.loss{color:var(--oxblood);}
+  .finance-note{font-family:var(--mono);font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--ink-faint);margin-top:14px;}
+
+  .wikiname{color:inherit;text-decoration:none;border-bottom:1px dotted var(--rule-strong);
+    cursor:help;transition:color .12s,border-color .12s;}
+  .wikiname:hover,.wikiname:focus{color:var(--oxblood);border-bottom-color:var(--oxblood);outline:none;}
+  .wikiname:focus-visible{outline:2px solid var(--oxblood);outline-offset:2px;}
+
+  #wiki-card{position:absolute;z-index:60;width:300px;max-width:82vw;
+    background:var(--paper-raised);border:1px solid var(--rule-strong);
+    box-shadow:0 14px 34px rgba(23,21,15,.16);opacity:0;pointer-events:none;
+    transform:translateY(5px);transition:opacity .15s ease,transform .15s ease;overflow:hidden;}
+  #wiki-card.show{opacity:1;pointer-events:auto;transform:none;}
+  .wiki-thumb{width:100%;height:150px;object-fit:cover;display:block;background:var(--rule);}
+  .wiki-inner{padding:15px 17px;}
+  .wiki-title{font-family:var(--serif);font-weight:500;font-size:1.2rem;line-height:1.15;margin-bottom:8px;}
+  .wiki-tag{font-family:var(--mono);font-size:.54rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-faint);border:1px solid var(--rule-strong);padding:2px 5px;vertical-align:middle;}
+  .wiki-extract{font-family:var(--read);font-size:.94rem;line-height:1.5;color:var(--ink-soft);margin:0 0 13px;}
+  .wiki-loading{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);}
+  .wiki-link{font-family:var(--mono);font-size:.64rem;letter-spacing:.13em;text-transform:uppercase;
+    color:var(--oxblood);text-decoration:none;border-bottom:1px solid transparent;padding-bottom:1px;}
+  .wiki-link:hover{border-bottom-color:var(--oxblood);}
+
+  .row-fig{font-family:var(--mono);color:var(--brass);}
+  .row-fig.none{color:var(--ink-faint);}
+
+  /* TMDB / dubbing */
+  .tmdb-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:2px 0 10px;}
+  .tmdb-btn{border-color:var(--oxblood);color:var(--oxblood);}
+  .tmdb-btn:hover{background:var(--oxblood);border-color:var(--oxblood);color:var(--paper);}
+  .tmdb-hint{font-family:var(--read);font-size:.9rem;color:var(--ink-faint);font-style:italic;}
+  .tmdb-status{font-family:var(--mono);font-size:.72rem;letter-spacing:.04em;color:var(--ink-soft);
+    min-height:1.1em;margin-bottom:8px;}
+  .tmdb-status.ok{color:var(--profit);}
+  .tmdb-status.warn{color:var(--oxblood);}
+  .tmdb-key-panel{background:var(--paper-raised);border:1px solid var(--rule);padding:16px 18px;margin:6px 0 14px;}
+  .tmdb-key-panel p{font-family:var(--read);font-size:.98rem;line-height:1.55;color:var(--ink-soft);margin:0 0 12px;}
+  .mono-inline{font-family:var(--mono);font-size:.85em;color:var(--ink);}
+  .poster-row{display:flex;gap:16px;align-items:flex-start;}
+  .poster-row input{flex:1;}
+  .poster-preview{width:70px;height:105px;object-fit:cover;border:1px solid var(--rule-strong);
+    background:var(--rule);flex-shrink:0;}
+  .cast-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:8px;}
+  .cast-head label{margin:0;}
+  .dub-btn{padding:6px 12px;font-size:.62rem;border-color:var(--oxblood);color:var(--oxblood);}
+  .dub-btn:hover{background:var(--oxblood);border-color:var(--oxblood);color:var(--paper);}
+  .dub-status{font-family:var(--mono);font-size:.7rem;letter-spacing:.04em;color:var(--ink-soft);margin-top:7px;min-height:1em;}
+  .dub-status.ok{color:var(--profit);}
+  .dub-status.warn{color:var(--oxblood);}
+  .tmdb-key-row{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+  .tmdb-key-row input{flex:1;min-width:220px;background:var(--paper);border:1px solid var(--rule);
+    padding:10px 12px;font-family:var(--mono);font-size:.82rem;color:var(--ink);}
+  .tmdb-key-row input:focus{outline:none;border-color:var(--oxblood);}
+  .tmdb-connected{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink-faint);margin:0 0 14px;}
+  .tmdb-credit{font-family:var(--mono);font-size:.58rem;letter-spacing:.08em;text-transform:none;
+    color:var(--ink-faint);flex-basis:100%;opacity:.8;}
+
+  .section{margin-bottom:30px;}
+  .section-label{font-family:var(--mono);font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--oxblood);margin-bottom:11px;display:flex;align-items:center;gap:10px;}
+  .section-label::after{content:"";flex:1;height:1px;background:var(--rule);}
+  .prose{font-family:var(--read);font-size:1.16rem;line-height:1.72;color:var(--ink);
+    max-width:64ch;white-space:pre-wrap;}
+  .prose.muted-empty{color:var(--ink-faint);font-style:italic;}
+  .thoughts .prose{font-size:1.24rem;}
+
+  .lower{clear:both;display:grid;grid-template-columns:1fr 1fr;gap:44px;margin-top:44px;
+    padding-top:30px;border-top:1px solid var(--rule);}
+  .cast-list,.view-list{list-style:none;margin:0;padding:0;}
+  .cast-list li{display:flex;justify-content:space-between;gap:16px;padding:8px 0;
+    border-bottom:1px solid var(--rule);font-size:1.02rem;}
+  .cast-list .actor{font-family:var(--read);color:var(--ink);}
+  .cast-list .char{font-family:var(--mono);font-size:.74rem;color:var(--ink-faint);
+    text-transform:uppercase;letter-spacing:.04em;text-align:right;padding-top:3px;}
+  .view-list li{display:flex;justify-content:space-between;gap:14px;padding:8px 0;
+    border-bottom:1px solid var(--rule);font-family:var(--mono);font-size:.82rem;color:var(--ink-soft);}
+  .view-list .vnote{color:var(--ink-faint);font-size:.72rem;text-align:right;}
+  .view-summary{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink-faint);margin-top:14px;}
+  .log-watch{margin-top:16px;}
+  .tag-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
+  .tag{font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;
+    border:1px solid var(--rule-strong);padding:5px 10px;color:var(--ink-soft);}
+  .tag.wikiname{border:1px solid var(--rule-strong);cursor:help;text-decoration:none;}
+  .tag.wikiname:hover,.tag.wikiname:focus{border-color:var(--oxblood);color:var(--oxblood);background:none;outline:none;}
+
+  /* ---------- lookup / "have I seen it" ---------- */
+  .lookup-wrap{max-width:640px;margin:10px auto 0;}
+  .lookup-head{font-family:var(--serif);font-weight:500;font-size:2.1rem;margin:0 0 6px;}
+  .lookup-sub{font-family:var(--read);color:var(--ink-soft);font-size:1.04rem;margin:0 0 22px;}
+  .lookup-form{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:26px;}
+  .lookup-form input{flex:1;min-width:220px;background:var(--paper-raised);border:1px solid var(--rule);
+    padding:14px 16px;font-size:1.1rem;color:var(--ink);font-family:var(--read);}
+  .lookup-form input:focus{outline:none;border-color:var(--oxblood);}
+  .verdict{border:1px solid var(--rule-strong);background:var(--paper-raised);padding:26px 26px;animation:rise .3s ease;}
+  .verdict.seen{border-left:5px solid var(--profit);}
+  .verdict.no{border-left:5px solid var(--oxblood);}
+  .verdict.maybe{border-left:5px solid var(--brass);}
+  .verdict-flag{font-family:var(--mono);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:12px;}
+  .verdict.seen .verdict-flag{color:var(--profit);}
+  .verdict.no .verdict-flag{color:var(--oxblood);}
+  .verdict.maybe .verdict-flag{color:var(--brass);}
+  .verdict-title{font-family:var(--serif);font-weight:500;font-size:1.9rem;line-height:1.1;margin:0 0 4px;cursor:pointer;}
+  .verdict-title:hover{color:var(--oxblood);}
+  .verdict-meta{font-family:var(--mono);font-size:.74rem;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--ink-faint);margin-bottom:16px;}
+  .verdict-thoughts{font-family:var(--read);font-size:1.1rem;line-height:1.6;color:var(--ink);
+    border-top:1px solid var(--rule);padding-top:16px;white-space:pre-wrap;}
+  .verdict-cand{padding:12px 0;border-bottom:1px solid var(--rule);cursor:pointer;display:flex;
+    justify-content:space-between;gap:12px;align-items:baseline;}
+  .verdict-cand:hover .cand-name{color:var(--oxblood);}
+  .cand-name{font-family:var(--serif);font-size:1.3rem;}
+  .cand-year{font-family:var(--mono);font-size:.78rem;color:var(--ink-faint);}
+
+  .form-head{font-family:var(--serif);font-weight:500;font-size:2.2rem;margin:0 0 26px;
+    border-bottom:2px solid var(--ink);padding-bottom:16px;font-optical-sizing:auto;}
+  .field{margin-bottom:22px;}
+  .field label{display:block;font-family:var(--mono);font-size:.68rem;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px;}
+  .field .hint{text-transform:none;letter-spacing:0;color:var(--ink-faint);font-size:.66rem;}
+  .field input,.field textarea,.field select{
+    width:100%;background:var(--paper-raised);border:1px solid var(--rule);
+    padding:11px 13px;font-size:1rem;color:var(--ink);border-radius:0;font-family:var(--read);
+  }
+  .field textarea{line-height:1.6;resize:vertical;}
+  .field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--oxblood);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px;}
+  .form-actions{display:flex;gap:12px;margin-top:34px;padding-top:24px;border-top:1px solid var(--rule);}
+  .form-actions .spacer{flex:1;}
+
+  .empty{text-align:center;padding:90px 20px;}
+  .empty h2{font-family:var(--serif);font-weight:500;font-size:2rem;margin:0 0 12px;}
+  .empty p{font-family:var(--read);color:var(--ink-soft);font-size:1.1rem;margin:0 0 26px;}
+
+  footer{margin:70px 0 40px;padding-top:20px;border-top:1px solid var(--rule);
+    font-family:var(--mono);font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--ink-faint);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+  .link-btn{background:none;border:none;font-family:var(--mono);font-size:.64rem;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--ink-faint);padding:0;text-decoration:underline;text-underline-offset:3px;}
+  .link-btn:hover{color:var(--oxblood);}
+
+  @media(max-width:680px){
+    .wrap{padding:0 20px;}
+    .lower{grid-template-columns:1fr;gap:34px;}
+    .page-head{grid-template-columns:1fr;}
+    .page-score{text-align:left;order:-1;padding-top:0;}
+    .page-score .num{font-size:1.8rem;}
+    .page-poster{width:96px;height:144px;margin:0 0 14px 18px;box-shadow:0 5px 14px rgba(23,21,15,.16);}
+    .grid2,.grid3{grid-template-columns:1fr;}
+    .wordmark{font-size:2rem;}
+    .index-row{grid-template-columns:auto 1fr;gap:14px;}
+    .row-score{grid-column:2;text-align:left;padding-top:0;}
+    .syncbar .sync-actions{margin-left:0;width:100%;}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <div class="masthead-inner">
+      <div>
+        <p class="eyebrow">A Film Study Journal</p>
+        <h1 class="wordmark" id="wordmark" onclick="go('library')">Screen Notes</h1>
+      </div>
+      <div class="masthead-meta" id="masthead-meta"></div>
+    </div>
+  </header>
+  <div class="syncbar" id="syncbar"></div>
+  <main id="app"></main>
+  <footer>
+    <span id="foot-count"></span>
+    <span>
+      <button class="link-btn" onclick="exportJSON()">Export backup</button> ·
+      <button class="link-btn" onclick="document.getElementById('import-file').click()">Import backup</button>
+    </span>
+    <span class="tmdb-credit">This product uses the TMDB API but is not endorsed or certified by TMDB.</span>
+  </footer>
+</div>
+<input type="file" id="import-file" accept="application/json" style="display:none" onchange="importJSON(event)">
+<div id="wiki-card" role="tooltip" aria-hidden="true"></div>
+
+<script>
+/* ============================================================
+   CONFIG  —  the only line you ever need to touch
+   ============================================================ */
+const CONFIG = {
+  APP_NAME:         "Screen Notes",
+  GOOGLE_CLIENT_ID: "978045220174-brbi77t754fgt9sisf2njekrfi5u6cm0.apps.googleusercontent.com",
+  DRIVE_FILENAME:   "screen-notes.json",
+  DRIVE_SCOPE:      "https://www.googleapis.com/auth/drive.file"
+};
+
+/* ============================================================
+   STORAGE SEAM
+   The app never talks to a backend directly. It calls the
+   Storage facade below (load / commit). Today the facade is
+   backed by a Google Drive adapter + a local cache. To move
+   to your own server later, write one new adapter with the
+   same shape (pull / push a JSON envelope) and swap it in at
+   ADAPTER — nothing else in the app changes.
+   Envelope shape: { version, entries:[...], deleted:[{id,at}], updatedAt }
+   ============================================================ */
+const CACHE_KEY = 'screen-notes-cache-v2';
+
+let DATA = [];      // array of entries (the working set)
+let DELETED = [];   // tombstones: [{id, at}]
+
+function envelopeNow(){
+  return { version:2, entries:DATA, deleted:DELETED, updatedAt:Date.now() };
+}
+function normalizeEnv(raw){
+  // accept: bare array (old backup) OR envelope
+  if(Array.isArray(raw)) return { version:2, entries:raw, deleted:[], updatedAt:Date.now() };
+  if(raw && Array.isArray(raw.entries))
+    return { version:2, entries:raw.entries, deleted:Array.isArray(raw.deleted)?raw.deleted:[], updatedAt:raw.updatedAt||Date.now() };
+  return { version:2, entries:[], deleted:[], updatedAt:Date.now() };
+}
+function readCache(){
+  try{ const r=localStorage.getItem(CACHE_KEY); return r?JSON.parse(r):null; }catch(e){ return null; }
+}
+function writeCache(env){
+  try{ localStorage.setItem(CACHE_KEY, JSON.stringify(env)); }catch(e){}
+}
+
+/* merge two envelopes without losing data across devices:
+   - newest updatedAt wins per entry id
+   - a tombstone removes an entry only if the delete is newer than the entry's last edit */
+function mergeEnv(a, b){
+  a=normalizeEnv(a); b=normalizeEnv(b);
+  const tomb={};
+  [a,b].forEach(env=>(env.deleted||[]).forEach(t=>{ if(t&&t.id) tomb[t.id]=Math.max(tomb[t.id]||0, t.at||0); }));
+  const byId={};
+  [a,b].forEach(env=>(env.entries||[]).forEach(e=>{
+    if(!e||!e.id) return;
+    const ex=byId[e.id];
+    if(!ex || (e.updatedAt||0) >= (ex.updatedAt||0)) byId[e.id]=e;
+  }));
+  const entries=Object.values(byId).filter(e=> !(tomb[e.id] && tomb[e.id] >= (e.updatedAt||0)));
+  const deleted=Object.keys(tomb).map(id=>({id, at:tomb[id]}));
+  return { version:2, entries, deleted, updatedAt:Date.now() };
+}
+
+/* Storage facade the app uses */
+const Storage = {
+  /* load working set from cache immediately (offline-first) */
+  loadLocal(){
+    const c=readCache();
+    const env=normalizeEnv(c||{entries:[]});
+    DATA=env.entries; DELETED=env.deleted;
+    return env;
+  },
+  /* called after every mutation: persist locally now, push to Drive best-effort */
+  commit(){
+    const env=envelopeNow();
+    env.dirty=true;
+    writeCache(env);
+    updateSyncBar();
+    Sync.push();   // async, safe if offline (stays dirty, retries on reconnect)
+  }
+};
+
+/* ============================================================
+   GOOGLE DRIVE ADAPTER  (auth + REST)
+   ============================================================ */
+let tokenClient=null, accessToken=null, tokenExpiry=0, gisTries=0;
+const BOUNDARY='snb'+Math.random().toString(36).slice(2);
+
+function gisReady(){ return typeof google!=='undefined' && google.accounts && google.accounts.oauth2; }
+function initGis(){
+  if(!gisReady()){
+    if(gisTries++ < 40){ setTimeout(initGis, 300); }
+    else { Sync.error='Google sign-in script did not load (offline?). Working locally.'; updateSyncBar(); }
+    return;
+  }
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CONFIG.GOOGLE_CLIENT_ID,
+    scope: CONFIG.DRIVE_SCOPE,
+    prompt: '',
+    callback: ()=>{}   // reassigned per request
+  });
+  // try to connect silently (works if already consented before)
+  Sync.connect(false).catch(()=>{ updateSyncBar(); });
+}
+
+function requestToken(interactive){
+  return new Promise((resolve,reject)=>{
+    if(!tokenClient){ reject(new Error('gis-not-ready')); return; }
+    tokenClient.callback = (resp)=>{
+      if(resp && resp.error){ reject(new Error(resp.error)); return; }
+      accessToken = resp.access_token;
+      tokenExpiry = Date.now() + ((resp.expires_in?resp.expires_in:3600)*1000) - 60000;
+      resolve(accessToken);
+    };
+    tokenClient.error_callback = (err)=>{ reject(new Error((err&&err.type)||'auth-failed')); };
+    try{ tokenClient.requestAccessToken({ prompt: interactive?'consent':'' }); }
+    catch(e){ reject(e); }
+  });
+}
+async function getToken(interactive){
+  if(accessToken && Date.now()<tokenExpiry) return accessToken;
+  return await requestToken(!!interactive);
+}
+async function driveFetch(url, opts){
+  opts=opts||{};
+  const tok=await getToken(false);
+  opts.headers=Object.assign({}, opts.headers||{}, {Authorization:'Bearer '+tok});
+  let res=await fetch(url, opts);
+  if(res.status===401){
+    accessToken=null;
+    const t2=await getToken(true);
+    opts.headers.Authorization='Bearer '+t2;
+    res=await fetch(url, opts);
+  }
+  return res;
+}
+async function driveFind(){
+  const q=encodeURIComponent(`name='${CONFIG.DRIVE_FILENAME}' and trashed=false`);
+  const res=await driveFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=drive&fields=files(id,name,modifiedTime,webViewLink)&pageSize=10`);
+  if(!res.ok) throw new Error('list '+res.status);
+  const d=await res.json();
+  return (d.files||[])[0]||null;
+}
+async function driveCreate(env){
+  const meta={name:CONFIG.DRIVE_FILENAME, mimeType:'application/json'};
+  const body=`--${BOUNDARY}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n`+
+    JSON.stringify(meta)+`\r\n--${BOUNDARY}\r\nContent-Type: application/json\r\n\r\n`+
+    JSON.stringify(stripFlags(env),null,2)+`\r\n--${BOUNDARY}--`;
+  const res=await driveFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,modifiedTime,webViewLink',
+    {method:'POST', headers:{'Content-Type':'multipart/related; boundary='+BOUNDARY}, body});
+  if(!res.ok) throw new Error('create '+res.status);
+  return await res.json();
+}
+async function driveRead(id){
+  const res=await driveFetch(`https://www.googleapis.com/drive/v3/files/${id}?alt=media`);
+  if(!res.ok) throw new Error('read '+res.status);
+  return await res.json();
+}
+async function driveMetaModified(id){
+  const res=await driveFetch(`https://www.googleapis.com/drive/v3/files/${id}?fields=modifiedTime`);
+  if(!res.ok) throw new Error('meta '+res.status);
+  return (await res.json()).modifiedTime;
+}
+async function driveWrite(id, env){
+  const res=await driveFetch(`https://www.googleapis.com/upload/drive/v3/files/${id}?uploadType=media&fields=id,modifiedTime`,
+    {method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify(stripFlags(env),null,2)});
+  if(!res.ok) throw new Error('write '+res.status);
+  return await res.json();
+}
+function stripFlags(env){ const {dirty, ...rest}=env; return rest; }
+
+/* ============================================================
+   SYNC CONTROLLER
+   ============================================================ */
+const Sync = {
+  connected:false, fileId:null, fileLink:null, lastRemoteModified:null,
+  busy:false, error:null, _again:false,
+
+  async connect(interactive){
+    this.error=null; updateSyncBar();
+    await getToken(!!interactive);          // throws if silent and not yet consented
+    this.connected=true;
+    let f=await driveFind();
+    const cache=readCache();
+    if(!f){
+      // no file yet — create it from whatever we have locally (usually empty)
+      const created=await driveCreate(cache?normalizeEnv(cache):envelopeNow());
+      this.fileId=created.id; this.fileLink=created.webViewLink||null;
+      this.lastRemoteModified=created.modifiedTime;
+      if(cache){ cache.dirty=false; writeCache(cache); }
+    } else {
+      this.fileId=f.id; this.fileLink=f.webViewLink||null; this.lastRemoteModified=f.modifiedTime;
+      await this.pull();
+      if(cache && cache.dirty) await this.push(true);
+    }
+    updateSyncBar();
+  },
+
+  async pull(){
+    if(!this.connected || !this.fileId) return;
+    const remote=await driveRead(this.fileId);
+    const cache=readCache();
+    let env;
+    if(cache && cache.dirty){
+      env=mergeEnv(cache, remote);
+      DATA=env.entries; DELETED=env.deleted;
+      await this._write(env);        // push the merged result back
+    } else {
+      env=normalizeEnv(remote);
+      DATA=env.entries; DELETED=env.deleted;
+      env.dirty=false; writeCache(env);
+    }
+    render();
+  },
+
+  async push(force){
+    if(!this.connected || !this.fileId) return;   // stays dirty in cache, will sync on connect
+    if(this.busy){ this._again=true; return; }
+    this.busy=true; this.error=null; updateSyncBar();
+    try{
+      let local=envelopeNow();
+      // stale guard: if the file changed elsewhere since our last sync, merge first
+      const mod=await driveMetaModified(this.fileId);
+      if(mod && this.lastRemoteModified && mod>this.lastRemoteModified){
+        const remote=await driveRead(this.fileId);
+        local=mergeEnv(local, remote);
+        DATA=local.entries; DELETED=local.deleted; render();
+      }
+      await this._write(local);
+    }catch(e){
+      this.error=humanErr(e);
+    }
+    this.busy=false; updateSyncBar();
+    if(this._again){ this._again=false; this.push(); }
+  },
+
+  async _write(env){
+    const saved=await driveWrite(this.fileId, env);
+    this.lastRemoteModified=saved.modifiedTime;
+    env.dirty=false; writeCache(env);
+    return saved;
+  },
+
+  disconnect(){
+    if(accessToken && gisReady()){ try{ google.accounts.oauth2.revoke(accessToken, ()=>{}); }catch(e){} }
+    accessToken=null; tokenExpiry=0; this.connected=false; this.fileId=null; this.fileLink=null;
+    updateSyncBar();
+  }
+};
+
+function humanErr(e){
+  const m=(e&&e.message)||String(e);
+  if(/popup|interaction|auth-failed|gis|access_denied|consent/i.test(m)) return 'sign-in needed';
+  if(/Failed to fetch|networkerror|offline/i.test(m)) return 'offline';
+  if(/40[13]/.test(m)) return 'permission issue';
+  return m;
+}
+
+/* connect / retry entry points from the UI */
+function connectDrive(){ Sync.connect(true).catch(e=>{ Sync.error=humanErr(e); updateSyncBar(); }); }
+function syncNow(){ if(Sync.connected) Sync.push(); else connectDrive(); }
+
+function updateSyncBar(){
+  const bar=document.getElementById('syncbar'); if(!bar) return;
+  let cls='', text='', actions='';
+  const cache=readCache(); const dirty=cache&&cache.dirty;
+  if(Sync.busy){ cls='busy'; text='Syncing to Drive…'; }
+  else if(Sync.error==='offline'){ cls='warn'; text='Offline — saved on this device, will sync when you reconnect';
+    actions='<button class="minibtn" onclick="syncNow()">Retry</button>'; }
+  else if(Sync.error){ cls='warn'; text='Drive '+Sync.error+' — saved on this device';
+    actions='<button class="minibtn accent" onclick="connectDrive()">Reconnect</button>'; }
+  else if(Sync.connected){ cls='ok'; text= dirty?'Saving…':'Synced to Google Drive';
+    actions=(Sync.fileLink?`<a class="drive-link" href="${attr(Sync.fileLink)}" target="_blank" rel="noopener">Open data file ↗</a>`:'')+
+      '<button class="minibtn" onclick="Sync.disconnect()">Sign out</button>'; }
+  else { cls=''; text='Local only — connect Drive to sync across your devices';
+    actions='<button class="minibtn accent" onclick="connectDrive()">Connect Google Drive</button>'; }
+  bar.innerHTML=`<span class="syncdot ${cls}"></span><span class="synctext">${escapeHtml(text)}</span><span class="sync-actions">${actions}</span>`;
+}
+
+/* ============================================================
+   derived helpers
+   ============================================================ */
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+const timesWatched = e => (e.viewings||[]).length;
+const lastSeen = e => {
+  const ds=(e.viewings||[]).map(v=>v.date).filter(Boolean).sort();
+  return ds.length ? ds[ds.length-1] : null;
+};
+const ret = e => (e.budget && e.boxOffice) ? (e.boxOffice/e.budget) : 0;
+const profit = e => (e.budget!=null && e.boxOffice!=null) ? (e.boxOffice-e.budget) : null;
+function fmtDate(d){
+  if(!d) return "—";
+  const [y,m,day]=d.split("-").map(Number);
+  const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return `${months[(m||1)-1]} ${day||1}, ${y}`;
+}
+function parseMoney(str){
+  if(str==null||str==="") return null;
+  if(typeof str==="number") return str;
+  let s=String(str).toLowerCase().replace(/[$,\s]/g,"");
+  let mult=1;
+  if(/(b|billion)$/.test(s)){ mult=1e9; s=s.replace(/(b|billion)$/,""); }
+  else if(/(m|million|mm)$/.test(s)){ mult=1e6; s=s.replace(/(m|million|mm)$/,""); }
+  else if(/(k|thousand)$/.test(s)){ mult=1e3; s=s.replace(/(k|thousand)$/,""); }
+  const n=parseFloat(s);
+  return isFinite(n)?Math.round(n*mult):null;
+}
+function trimNum(x){ let s=x.toFixed(1); return s.endsWith(".0")?s.slice(0,-2):s; }
+function fmtMoney(n){
+  if(n==null||n==="") return "—";
+  n=Number(n); if(!isFinite(n)) return "—";
+  const sign=n<0?"−":""; n=Math.abs(n);
+  let out;
+  if(n>=1e9) out=trimNum(n/1e9)+"B";
+  else if(n>=1e6) out=trimNum(n/1e6)+"M";
+  else if(n>=1e3) out=trimNum(n/1e3)+"K";
+  else out=String(n);
+  return sign+"$"+out;
+}
+function today(){
+  const t=new Date();
+  return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+}
+
+/* ============================================================
+   ROUTER
+   ============================================================ */
+let VIEW={name:'library', id:null};
+let SEARCH="", FILTER_TYPE="all", SORT="added";
+let LOOKUP_Q="", LOOKUP_RESULT=null;
+function go(name,id){ VIEW={name,id}; window.scrollTo(0,0); render(); }
+
+/* ============================================================
+   VIEWS
+   ============================================================ */
+function render(){
+  const app=document.getElementById('app');
+  document.getElementById('masthead-meta').innerHTML =
+    `${DATA.length} ${DATA.length===1?'entry':'entries'}<br>`+
+    `<span style="cursor:pointer" onclick="go('lookup')">Have I seen it? →</span>`;
+  document.getElementById('foot-count').textContent =
+    `Screen Notes — ${DATA.length} ${DATA.length===1?'film':'films'} logged`;
+
+  if(VIEW.name==='library') app.innerHTML=LibraryView();
+  else if(VIEW.name==='entry') app.innerHTML=EntryView(DATA.find(e=>e.id===VIEW.id));
+  else if(VIEW.name==='form') app.innerHTML=FormView(VIEW.id?DATA.find(e=>e.id===VIEW.id):null, VIEW.prefill);
+  else if(VIEW.name==='lookup') app.innerHTML=LookupView();
+
+  if(VIEW.name==='library'){ const s=document.getElementById('search-input'); if(s) s.value=SEARCH; }
+  if(VIEW.name==='lookup'){ const l=document.getElementById('lookup-input'); if(l){ l.value=LOOKUP_Q; l.focus(); } }
+  updateSyncBar();
+}
+
+function matchesSearch(e,q){
+  if(!q) return true;
+  q=q.toLowerCase();
+  const hay=[e.title,e.director,e.writers,e.producers,e.studios,String(e.year),
+    ...(e.genres||[]),...(e.franchises||[]),
+    ...(e.cast||[]).map(c=>c.name),...(e.cast||[]).map(c=>c.character)
+  ].filter(Boolean).join(" ").toLowerCase();
+  return hay.includes(q);
+}
+
+function LibraryView(){
+  let list=DATA.filter(e=>matchesSearch(e,SEARCH))
+               .filter(e=> FILTER_TYPE==="all"?true:e.type===FILTER_TYPE);
+  const sorters={
+    added:(a,b)=>DATA.indexOf(b)-DATA.indexOf(a),
+    title:(a,b)=>a.title.localeCompare(b.title),
+    year:(a,b)=>(b.year||0)-(a.year||0),
+    rating:(a,b)=>(b.rating||0)-(a.rating||0),
+    seen:(a,b)=>(lastSeen(b)||"").localeCompare(lastSeen(a)||""),
+    budget:(a,b)=>(b.budget||0)-(a.budget||0),
+    boxoffice:(a,b)=>(b.boxOffice||0)-(a.boxOffice||0),
+    return:(a,b)=>ret(b)-ret(a)
+  };
+  list=list.slice().sort(sorters[SORT]||sorters.added);
+
+  const controls=`
+    <div class="controls">
+      <div class="search">
+        <input id="search-input" type="text" placeholder="Search title, actor, director, franchise, genre…"
+               oninput="SEARCH=this.value;render()" autocomplete="off">
+      </div>
+      <select class="filter" onchange="FILTER_TYPE=this.value;render()">
+        <option value="all"${sel(FILTER_TYPE,'all')}>All</option>
+        <option value="movie"${sel(FILTER_TYPE,'movie')}>Films</option>
+        <option value="tv"${sel(FILTER_TYPE,'tv')}>Television</option>
+      </select>
+      <select class="filter" onchange="SORT=this.value;render()">
+        <option value="added"${sel(SORT,'added')}>Recently added</option>
+        <option value="title"${sel(SORT,'title')}>Title A–Z</option>
+        <option value="year"${sel(SORT,'year')}>Year</option>
+        <option value="rating"${sel(SORT,'rating')}>Rating</option>
+        <option value="seen"${sel(SORT,'seen')}>Recently seen</option>
+        <option value="budget"${sel(SORT,'budget')}>Budget (high → low)</option>
+        <option value="boxoffice"${sel(SORT,'boxoffice')}>Box office (high → low)</option>
+        <option value="return"${sel(SORT,'return')}>Return (gross ÷ budget)</option>
+      </select>
+      <button class="btn" onclick="go('lookup')">Have I seen it?</button>
+      <button class="btn btn-primary" onclick="go('form')">＋ New entry</button>
+    </div>`;
+
+  if(DATA.length===0){
+    return controls+`
+      <div class="empty">
+        <h2>The journal is empty.</h2>
+        <p>Every film you study starts as a blank page. Add the first one.</p>
+        <button class="btn btn-primary" onclick="go('form')">Add the first entry</button>
+      </div>`;
+  }
+  if(list.length===0){
+    return controls+`<div class="empty"><h2>Nothing matches.</h2>
+      <p>No entry fits “${escapeHtml(SEARCH)}”. Try a different name or clear the search.</p></div>`;
+  }
+
+  const rows=list.map(e=>{
+    const dir=e.director?`<span class="dir">Dir. ${escapeHtml(e.director)}</span>`:"";
+    const gen=(e.genres||[]).slice(0,3).join(" · ");
+    let mid=[dir,gen].filter(Boolean).join("&nbsp;&nbsp;—&nbsp;&nbsp;");
+    const figs={
+      budget:e.budget?fmtMoney(e.budget):null,
+      boxoffice:e.boxOffice?fmtMoney(e.boxOffice):null,
+      return:ret(e)?trimNum(ret(e))+"× budget":null
+    };
+    const noData={budget:"no budget on file",boxoffice:"no gross on file",return:"no budget / gross on file"};
+    if(figs.hasOwnProperty(SORT)){
+      const chip=figs[SORT]?`<span class="row-fig">${figs[SORT]}</span>`
+        :`<span class="row-fig none">${noData[SORT]}</span>`;
+      mid=[chip,mid].filter(Boolean).join("&nbsp;&nbsp;—&nbsp;&nbsp;");
+    }
+    const score=(e.rating||e.rating===0)
+      ?`<div class="row-score">${fmtScore(e.rating)}<span class="unit">/10</span></div>`
+      :`<div class="row-score none">—</div>`;
+    const tv=e.type==='tv'?`<span class="tv-tag">TV</span>`:"";
+    return `<li class="index-row" onclick="go('entry','${e.id}')">
+        <div class="row-year">${e.year||'—'}</div>
+        <div class="row-main">
+          <div class="row-title">${escapeHtml(e.title)}${tv}</div>
+          <div class="row-sub">${mid||'&nbsp;'}</div>
+        </div>
+        ${score}
+      </li>`;
+  }).join("");
+
+  return controls+
+    `<div class="count-line">${list.length} ${list.length===1?'entry':'entries'}</div>
+     <ul class="index">${rows}</ul>`;
+}
+
+/* ---------- lookup / "have I seen it?" ---------- */
+function normTitle(s){
+  return String(s||'').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9]+/g,' ').replace(/\b(the|a|an)\b/g,' ')
+    .replace(/\s+/g,' ').trim();
+}
+function runLookup(q){
+  LOOKUP_Q=q;
+  const nq=normTitle(q);
+  if(!nq){ LOOKUP_RESULT=null; render(); return; }
+  const exact=DATA.filter(e=>normTitle(e.title)===nq);
+  if(exact.length){ LOOKUP_RESULT={status:'seen',matches:exact}; render(); return; }
+  const partial=DATA.filter(e=>{ const t=normTitle(e.title); return t&&(t.includes(nq)||nq.includes(t)); });
+  if(partial.length){ LOOKUP_RESULT={status:'maybe',matches:partial}; render(); return; }
+  LOOKUP_RESULT={status:'no',query:q}; render();
+}
+function LookupView(){
+  let out='';
+  const r=LOOKUP_RESULT;
+  if(r&&r.status==='seen'){
+    out=r.matches.map(e=>verdictCard(e,'seen','Yes — you\'ve seen this')).join('');
+  }else if(r&&r.status==='maybe'){
+    if(r.matches.length===1){ out=verdictCard(r.matches[0],'maybe','Probably — closest match in your journal'); }
+    else{
+      out=`<div class="verdict maybe"><div class="verdict-flag">A few possible matches</div>`+
+        r.matches.slice(0,8).map(e=>
+          `<div class="verdict-cand" onclick="go('entry','${e.id}')">
+             <span class="cand-name">${escapeHtml(e.title)}</span>
+             <span class="cand-year">${e.year||''} ${e.rating!=null?'· '+fmtScore(e.rating)+'/10':''}</span>
+           </div>`).join('')+`</div>`;
+    }
+  }else if(r&&r.status==='no'){
+    out=`<div class="verdict no">
+      <div class="verdict-flag">No — not in your journal</div>
+      <div class="verdict-title" style="cursor:default">“${escapeHtml(r.query)}” isn't logged</div>
+      <div class="verdict-meta">You haven't recorded seeing this yet.</div>
+      <button class="btn btn-primary" onclick="go('form', null, '${attr(r.query)}')">＋ Add it now</button>
+    </div>`;
+  }
+  return `<div class="lookup-wrap">
+    <button class="btn btn-ghost" onclick="go('library')">← Back to index</button>
+    <h1 class="lookup-head">Have I seen it?</h1>
+    <p class="lookup-sub">Type a title and check it against everything you've logged.</p>
+    <div class="lookup-form">
+      <input id="lookup-input" type="text" placeholder="e.g. Chinatown"
+        onkeydown="if(event.key==='Enter')runLookup(this.value)" autocomplete="off">
+      <button class="btn btn-primary" onclick="runLookup(document.getElementById('lookup-input').value)">Check</button>
+    </div>
+    ${out}
+  </div>`;
+}
+function verdictCard(e, cls, flag){
+  const last=lastSeen(e);
+  const meta=[
+    e.year?e.year:null,
+    e.type==='tv'?'Television':'Film',
+    e.rating!=null?fmtScore(e.rating)+'/10':'unrated',
+    `seen ${timesWatched(e)} ${timesWatched(e)===1?'time':'times'}`,
+    last?`last ${fmtDate(last)}`:null
+  ].filter(Boolean).join('  ·  ');
+  return `<div class="verdict ${cls}">
+    <div class="verdict-flag">${flag}</div>
+    <div class="verdict-title" onclick="go('entry','${e.id}')">${escapeHtml(e.title)}</div>
+    <div class="verdict-meta">${escapeHtml(meta)}</div>
+    ${e.thoughts?`<div class="verdict-thoughts">${escapeHtml(e.thoughts)}</div>`:'<div class="verdict-thoughts" style="color:var(--ink-faint);font-style:italic">No thoughts written yet.</div>'}
+  </div>`;
+}
+
+function EntryView(e){
+  if(!e) return `<p>Entry not found. <button class="btn" onclick="go('library')">Back</button></p>`;
+  const runtime=e.type==='tv'
+    ?[e.seasons?`${e.seasons} ${e.seasons==1?'season':'seasons'}`:null,
+      e.episodes?`${e.episodes} ep`:null].filter(Boolean).join(" · ")
+    :(e.runtime?`${e.runtime} min`:null);
+  const slateBits=[
+    e.year?(e.type==='tv'&&e.endYear?`${e.year}–${e.endYear}`:
+            (e.type==='tv'&&!e.endYear?`${e.year}– `:e.year)):null,
+    runtime,e.country,e.language,e.type==='tv'?'Television':null
+  ].filter(Boolean);
+  const slate=slateBits.map(escapeHtml).join('<span class="sep"> · </span>');
+
+  const score=(e.rating||e.rating===0)
+    ?`<div class="page-score"><div class="num">${fmtScore(e.rating)}</div><div class="lbl">out of 10</div></div>`
+    :`<div class="page-score none"><div class="num">—</div><div class="lbl">unrated</div></div>`;
+
+  const poster=e.poster
+    ?`<img class="page-poster" src="${attr(e.poster)}" alt="Poster for ${attr(e.title)}" loading="lazy" onerror="this.style.display='none'">`
+    :"";
+
+  const section=(label,text,cls="")=>text
+    ?`<div class="section ${cls}"><div class="section-label">${label}</div><div class="prose">${escapeHtml(text)}</div></div>`:"";
+
+  const cast=(e.cast||[]).length?`
+    <div>
+      <div class="section-label">Cast</div>
+      <ul class="cast-list">${e.cast.map(c=>
+        `<li><span class="actor">${nameLink(c.name)}</span>${
+          c.character?`<span class="char">${escapeHtml(c.character)}</span>`:''}</li>`).join("")}</ul>
+    </div>`:"";
+
+  const vs=(e.viewings||[]).slice().sort((a,b)=>(a.date||"").localeCompare(b.date||""));
+  const views=`
+    <div>
+      <div class="section-label">Viewing history</div>
+      ${vs.length?`<ul class="view-list">${vs.map(v=>
+        `<li><span>${fmtDate(v.date)}</span>${v.note?`<span class="vnote">${escapeHtml(v.note)}</span>`:''}</li>`).join("")}</ul>`
+        :`<div class="prose muted-empty">Not yet logged.</div>`}
+      <div class="view-summary">Seen ${timesWatched(e)} ${timesWatched(e)===1?'time':'times'} · Last ${fmtDate(lastSeen(e))}</div>
+      <button class="btn log-watch" onclick="logWatch('${e.id}')">＋ Log a watch (today)</button>
+    </div>`;
+
+  const franchiseTags=(e.franchises||[]).length?`
+    <div class="section"><div class="section-label">Franchise</div>
+      <div class="tag-row">${e.franchises.map(f=>
+        `<a class="tag wikiname" data-name="${attr(f)}" href="${wikiSearchUrl(f)}" target="_blank" rel="noopener">${escapeHtml(f)}</a>`).join("")}</div></div>`:"";
+
+  const creditRows=[
+    ["Directed by",peopleLinks(e.director)],
+    ["Written by",peopleLinks(e.writers)],
+    ["Produced by",peopleLinks(e.producers)],
+    [(e.studios&&e.studios.includes(','))?"Studios":"Studio",peopleLinks(e.studios)]
+  ].filter(r=>r[1]);
+  const credits=creditRows.length
+    ?`<dl class="credits">${creditRows.map(r=>`<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join("")}</dl>`
+    :'<div style="margin-bottom:34px"></div>';
+
+  const hasFinance=e.type==='movie'&&(e.budget||e.boxOffice);
+  const m=ret(e), p=profit(e);
+  const pl=(p!=null)
+    ?`<div class="fig"><div class="k">Profit / loss</div><div class="val ${p<0?'loss':'profit'}">${p<0?'−':'+'}${fmtMoney(Math.abs(p))}</div></div>`:"";
+  const boxOffice=hasFinance?`
+    <div class="section"><div class="section-label">Box office</div>
+      <div class="finance">
+        <div class="fig"><div class="k">Budget</div><div class="val">${fmtMoney(e.budget)}</div></div>
+        <div class="fig"><div class="k">Worldwide gross</div><div class="val">${fmtMoney(e.boxOffice)}</div></div>
+        ${pl}
+        ${m?`<div class="fig"><div class="k">Return</div><div class="val mult">${trimNum(m)}× budget</div></div>`:''}
+      </div>
+      ${(p!=null)?'<div class="finance-note">Against production budget only — excludes marketing and distribution.</div>':''}
+    </div>`:"";
+
+  return `<div class="page">
+    <div class="page-top">
+      <button class="btn btn-ghost" onclick="go('library')">← Back to index</button>
+      <div class="page-actions">
+        <button class="btn" onclick="go('form','${e.id}')">Edit entry</button>
+        <button class="btn" onclick="removeEntry('${e.id}')">Delete</button>
+      </div>
+    </div>
+    <div class="page-head">
+      <h1 class="page-title">${escapeHtml(e.title)}</h1>
+      ${score}
+    </div>
+    ${poster}
+    <div class="slate">${slate}</div>
+    ${credits}
+    ${section("Synopsis",e.synopsis)}
+    ${section("My thoughts",e.thoughts,"thoughts")}
+    ${section("Notable",e.notable)}
+    ${boxOffice}
+    ${franchiseTags}
+    <div class="lower">
+      ${cast||'<div></div>'}
+      ${views}
+    </div>
+  </div>`;
+}
+
+function FormView(e, prefill){
+  const edit=!!e;
+  const v=(k,d="")=> e&&e[k]!=null?e[k]:d;
+  const castText=e&&e.cast?e.cast.map(c=>c.character?`${c.name} — ${c.character}`:c.name).join("\n"):"";
+  const viewText=e&&e.viewings?e.viewings.map(x=>x.note?`${x.date} — ${x.note}`:x.date).join("\n"):"";
+  const titleVal = edit ? v('title') : (prefill||"");
+  return `<div class="page">
+    <div class="page-top"><button class="btn btn-ghost" onclick="go(${edit?`'entry','${e.id}'`:`'library'`})">← Cancel</button></div>
+    <h1 class="form-head">${edit?'Edit entry':'New entry'}</h1>
+
+    <div class="field">
+      <label>Title</label>
+      <input id="f-title" value="${attr(titleVal)}" placeholder="e.g. Chinatown">
+    </div>
+
+    <div class="grid3">
+      <div class="field"><label>Type</label>
+        <select id="f-type">
+          <option value="movie"${sel(v('type','movie'),'movie')}>Film</option>
+          <option value="tv"${sel(v('type','movie'),'tv')}>Television</option>
+        </select>
+      </div>
+      <div class="field"><label>Year</label>
+        <input id="f-year" type="number" value="${attr(v('year'))}" placeholder="1974"></div>
+      <div class="field"><label>Rating <span class="hint">/10</span></label>
+        <input id="f-rating" type="number" step="0.1" min="0" max="10" value="${attr(v('rating'))}" placeholder="8.5"></div>
+    </div>
+
+    <div class="tmdb-bar">
+      <button type="button" class="btn tmdb-btn" onclick="tmdbAutofill()">⤓ Auto-fill from TMDB</button>
+      <span class="tmdb-hint">Fills the factual fields from title · type · year. Your thoughts, rating &amp; viewings stay yours.</span>
+    </div>
+    <div id="tmdb-status" class="tmdb-status"></div>
+    <div id="tmdb-key-panel" class="tmdb-key-panel" style="display:none">
+      <p>Auto-fill pulls from <strong>TMDB</strong>, the community film database. It needs a free API key — about two minutes to set up on a desktop, free forever, fine for personal use. Either credential works: the <strong>v3 key</strong> (32 characters) or the <strong>v4 Read Access Token</strong> (a long <span class="mono-inline">eyJ…</span> token).</p>
+      <div class="tmdb-key-row">
+        <input id="tmdb-key-input" type="text" placeholder="Paste your TMDB v3 key or v4 token" autocomplete="off">
+        <button type="button" class="btn btn-primary" onclick="saveTmdbKeyFromInput()">Save key</button>
+      </div>
+      <a class="wiki-link" href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener">Get a free TMDB key ↗</a>
+    </div>
+    ${tmdbKey()?`<div class="tmdb-connected">✓ TMDB connected (${tmdbIsV4(tmdbKey())?'v4 token':'v3 key'}) · <button type="button" class="link-btn" onclick="showKeyPanel(true)">change key</button></div>`:''}
+
+    <div class="grid3">
+      <div class="field"><label>Runtime <span class="hint">min</span></label>
+        <input id="f-runtime" type="number" value="${attr(v('runtime'))}" placeholder="130"></div>
+      <div class="field"><label>Seasons <span class="hint">TV</span></label>
+        <input id="f-seasons" type="number" value="${attr(v('seasons'))}"></div>
+      <div class="field"><label>Episodes <span class="hint">TV</span></label>
+        <input id="f-episodes" type="number" value="${attr(v('episodes'))}"></div>
+    </div>
+
+    <div class="grid2">
+      <div class="field"><label>Country</label>
+        <input id="f-country" value="${attr(v('country'))}" placeholder="USA"></div>
+      <div class="field"><label>Language</label>
+        <input id="f-language" value="${attr(v('language'))}" placeholder="English"></div>
+    </div>
+
+    <div class="grid2">
+      <div class="field"><label>Director</label>
+        <input id="f-director" value="${attr(v('director'))}" placeholder="Roman Polanski"></div>
+      <div class="field"><label>Writers</label>
+        <input id="f-writers" value="${attr(v('writers'))}" placeholder="Robert Towne"></div>
+    </div>
+
+    <div class="grid2">
+      <div class="field"><label>Producers</label>
+        <input id="f-producers" value="${attr(v('producers'))}" placeholder="Robert Evans"></div>
+      <div class="field"><label>Production studios</label>
+        <input id="f-studios" value="${attr(v('studios'))}" placeholder="Paramount Pictures"></div>
+    </div>
+
+    <div class="field">
+      <div class="cast-head">
+        <label>Cast <span class="hint">— one per line: Name — Character</span></label>
+        <button type="button" class="btn dub-btn" onclick="animeDubCast()">⤓ JP + EN dub cast</button>
+      </div>
+      <textarea id="f-cast" rows="4" placeholder="Jack Nicholson — J.J. Gittes&#10;Faye Dunaway — Evelyn Mulwray">${escapeHtml(castText)}</textarea>
+      <div id="dub-status" class="dub-status"></div>
+    </div>
+
+    <div class="grid2">
+      <div class="field"><label>Genres <span class="hint">comma-separated</span></label>
+        <input id="f-genres" value="${attr((v('genres',[])||[]).join(', '))}" placeholder="Neo-noir, Mystery"></div>
+      <div class="field"><label>Franchises <span class="hint">comma-separated</span></label>
+        <input id="f-franchises" value="${attr((v('franchises',[])||[]).join(', '))}" placeholder=""></div>
+    </div>
+
+    <div class="grid2">
+      <div class="field"><label>Budget <span class="hint">films — type 185M, $150m, 267000000</span></label>
+        <input id="f-budget" value="${attr(e&&e.budget!=null?fmtMoney(e.budget).replace('$',''):'')}" placeholder="185M"></div>
+      <div class="field"><label>Box office gross <span class="hint">worldwide</span></label>
+        <input id="f-boxoffice" value="${attr(e&&e.boxOffice!=null?fmtMoney(e.boxOffice).replace('$',''):'')}" placeholder="267M"></div>
+    </div>
+
+    <div class="field poster-field">
+      <label>Poster image <span class="hint">— auto-filled by TMDB; paste a URL or clear it to remove</span></label>
+      <div class="poster-row">
+        <input id="f-poster" value="${attr(v('poster'))}" placeholder="https://image.tmdb.org/t/p/w500/…"
+          oninput="const pv=document.getElementById('f-poster-preview'); pv.src=this.value; pv.style.display=this.value?'block':'none';">
+        <img id="f-poster-preview" class="poster-preview" src="${attr(v('poster'))}" alt=""
+          style="display:${v('poster')?'block':'none'}" onerror="this.style.display='none'">
+      </div>
+    </div>
+
+    <div class="field"><label>Synopsis</label>
+      <textarea id="f-synopsis" rows="3" placeholder="A brief, spoiler-light summary.">${escapeHtml(v('synopsis'))}</textarea></div>
+    <div class="field"><label>My thoughts</label>
+      <textarea id="f-thoughts" rows="5" placeholder="What is this film doing, and how? What did you take from it?">${escapeHtml(v('thoughts'))}</textarea></div>
+    <div class="field"><label>Notable <span class="hint">trivia, technique, context worth remembering</span></label>
+      <textarea id="f-notable" rows="3">${escapeHtml(v('notable'))}</textarea></div>
+
+    <div class="field"><label>Viewing history <span class="hint">— one per line: YYYY-MM-DD — note</span></label>
+      <textarea id="f-views" rows="3" placeholder="2025-01-10 — first watch, cinema">${escapeHtml(viewText)}</textarea></div>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="saveEntry(${edit?`'${e.id}'`:'null'})">${edit?'Save changes':'Add to journal'}</button>
+      <div class="spacer"></div>
+      ${edit?`<button class="btn" onclick="removeEntry('${e.id}')">Delete entry</button>`:''}
+    </div>
+  </div>`;
+}
+
+/* patch go() to carry a prefill for the form */
+(function(){
+  const _go=go;
+  go=function(name,id,prefill){ VIEW={name,id,prefill}; window.scrollTo(0,0); render(); };
+})();
+
+/* ============================================================
+   ACTIONS  (mutations stamp updatedAt, then Storage.commit)
+   ============================================================ */
+function saveEntry(id){
+  const g=k=>{const el=document.getElementById(k);return el?el.value.trim():"";};
+  const num=k=>{const s=g(k);return s===""?null:Number(s);};
+
+  const cast=g('f-cast').split("\n").map(l=>l.trim()).filter(Boolean).map(line=>{
+    const parts=line.split(/\s+[—–-]\s+/);
+    return {name:parts[0].trim(),character:(parts[1]||"").trim()};
+  });
+  const views=g('f-views').split("\n").map(l=>l.trim()).filter(Boolean).map(line=>{
+    const parts=line.split(/\s+[—–-]\s+/);
+    return {date:parts[0].trim(),note:(parts.slice(1).join(" — ")||"").trim()};
+  });
+  const listField=k=>g(k).split(",").map(s=>s.trim()).filter(Boolean);
+
+  const title=g('f-title');
+  if(!title){ alert("A title is needed before this can be saved."); return; }
+
+  const entry={
+    id:id||uid(),
+    title, type:g('f-type')||'movie',
+    year:num('f-year'), endYear:null,
+    runtime:num('f-runtime'), seasons:num('f-seasons'), episodes:num('f-episodes'),
+    country:g('f-country'), language:g('f-language'),
+    director:g('f-director'), writers:g('f-writers'),
+    producers:g('f-producers'), studios:g('f-studios'),
+    budget:parseMoney(g('f-budget')), boxOffice:parseMoney(g('f-boxoffice')),
+    cast, genres:listField('f-genres'), franchises:listField('f-franchises'),
+    synopsis:g('f-synopsis'), thoughts:g('f-thoughts'), notable:g('f-notable'),
+    poster:g('f-poster'),
+    rating:num('f-rating'), viewings:views,
+    updatedAt:Date.now()
+  };
+
+  if(id){ const i=DATA.findIndex(e=>e.id===id); DATA[i]=entry; }
+  else DATA.unshift(entry);
+  Storage.commit(); go('entry',entry.id);
+}
+
+function logWatch(id){
+  const e=DATA.find(x=>x.id===id); if(!e) return;
+  e.viewings=e.viewings||[]; e.viewings.push({date:today(),note:""});
+  e.updatedAt=Date.now();
+  Storage.commit(); render();
+}
+
+function removeEntry(id){
+  const e=DATA.find(x=>x.id===id);
+  if(!confirm(`Delete “${e?e.title:'this entry'}” from the journal? This can't be undone.`)) return;
+  DATA=DATA.filter(x=>x.id!==id);
+  DELETED.push({id, at:Date.now()});
+  Storage.commit(); go('library');
+}
+
+/* ---------- backup ---------- */
+function exportJSON(){
+  const blob=new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`screen-notes-${today()}.json`;
+  a.click(); URL.revokeObjectURL(a.href);
+}
+function importJSON(ev){
+  const file=ev.target.files[0]; if(!file) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const parsed=JSON.parse(r.result);
+      const env=normalizeEnv(parsed);
+      if(!confirm(`Import ${env.entries.length} entries? This replaces the current journal (export a backup first if unsure).`)) return;
+      DATA=env.entries.map(e=> e.updatedAt?e:Object.assign({},e,{updatedAt:Date.now()}));
+      DELETED=env.deleted||[];
+      Storage.commit(); go('library');
+    }catch(e){ alert("That file couldn't be read as a Screen Notes backup."); }
+  };
+  r.readAsText(file);
+  ev.target.value="";
+}
+
+/* ---------- tiny utils ---------- */
+function escapeHtml(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function attr(s){ return String(s==null?"":s).replace(/"/g,"&quot;"); }
+function sel(a,b){ return a===b?" selected":""; }
+function fmtScore(n){ return Number.isInteger(n)?n.toFixed(1):String(n); }
+
+/* ---------- Wikipedia name links + hover preview ---------- */
+function wikiSearchUrl(name){
+  return "https://en.wikipedia.org/w/index.php?title=Special:Search&search="+encodeURIComponent(name)+"&go=Go";
+}
+function nameLink(name){
+  name=String(name||"").trim();
+  if(!name) return "";
+  return `<a class="wikiname" data-name="${attr(name)}" href="${wikiSearchUrl(name)}" target="_blank" rel="noopener">${escapeHtml(name)}</a>`;
+}
+function peopleLinks(str){
+  if(!str) return "";
+  return String(str).split(",").map(s=>s.trim()).filter(Boolean).map(nameLink).join(", ");
+}
+const WIKI_CACHE={};
+let wikiShowTimer,wikiHideTimer,wikiCurrent=null;
+function wikiCard(){ return document.getElementById('wiki-card'); }
+async function wikiLookup(name){
+  if(WIKI_CACHE[name]) return WIKI_CACHE[name];
+  try{
+    const url="https://en.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(name);
+    const res=await fetch(url,{headers:{accept:"application/json"}});
+    if(!res.ok) throw new Error("not found");
+    const d=await res.json();
+    WIKI_CACHE[name]={
+      found:d.type!=="no-extract", title:d.title||name, extract:d.extract||"",
+      thumb:d.thumbnail?d.thumbnail.source:null, disambig:d.type==="disambiguation",
+      page:(d.content_urls&&d.content_urls.desktop&&d.content_urls.desktop.page)||wikiSearchUrl(name)
+    };
+  }catch(e){ WIKI_CACHE[name]={found:false,title:name,page:wikiSearchUrl(name)}; }
+  return WIKI_CACHE[name];
+}
+function renderWikiCard(name,state){
+  const card=wikiCard();
+  if(wikiCurrent!==name) return;
+  if(state==="loading"){ card.innerHTML=`<div class="wiki-inner"><div class="wiki-loading">Looking up ${escapeHtml(name)}…</div></div>`; return; }
+  const d=WIKI_CACHE[name];
+  if(d&&d.found){
+    const clip=d.extract.length>220?d.extract.slice(0,217).trim()+"…":d.extract;
+    card.innerHTML=(d.thumb?`<img class="wiki-thumb" src="${attr(d.thumb)}" alt="">`:"")+
+      `<div class="wiki-inner">
+         <div class="wiki-title">${escapeHtml(d.title)}${d.disambig?' <span class="wiki-tag">disambiguation</span>':''}</div>
+         ${clip?`<p class="wiki-extract">${escapeHtml(clip)}</p>`:""}
+         <a class="wiki-link" href="${attr(d.page)}" target="_blank" rel="noopener">Read on Wikipedia →</a>
+       </div>`;
+  }else{
+    card.innerHTML=`<div class="wiki-inner">
+         <div class="wiki-title">${escapeHtml(name)}</div>
+         <p class="wiki-extract">No exact Wikipedia article found.</p>
+         <a class="wiki-link" href="${wikiSearchUrl(name)}" target="_blank" rel="noopener">Search Wikipedia →</a>
+       </div>`;
+  }
+}
+function positionWikiCard(el){
+  const card=wikiCard();
+  const r=el.getBoundingClientRect();
+  card.style.top=(window.scrollY+r.bottom+8)+"px";
+  const vw=document.documentElement.clientWidth;
+  let left=window.scrollX+r.left;
+  const maxLeft=window.scrollX+vw-318;
+  if(left>maxLeft) left=maxLeft;
+  if(left<window.scrollX+8) left=window.scrollX+8;
+  card.style.left=left+"px";
+}
+async function showWiki(el,name){
+  const card=wikiCard();
+  wikiCurrent=name;
+  positionWikiCard(el);
+  card.classList.add('show');
+  if(!WIKI_CACHE[name]){ renderWikiCard(name,"loading"); await wikiLookup(name); }
+  renderWikiCard(name,"done");
+  positionWikiCard(el);
+}
+function hideWiki(){ wikiCurrent=null; wikiCard().classList.remove('show'); }
+function bindWikiHover(){
+  const card=wikiCard();
+  const enter=ev=>{
+    const el=ev.target.closest('.wikiname'); if(!el) return;
+    clearTimeout(wikiHideTimer);
+    const name=el.getAttribute('data-name');
+    clearTimeout(wikiShowTimer);
+    wikiShowTimer=setTimeout(()=>showWiki(el,name),220);
+  };
+  const leave=ev=>{
+    if(!ev.target.closest('.wikiname')) return;
+    clearTimeout(wikiShowTimer);
+    wikiHideTimer=setTimeout(hideWiki,220);
+  };
+  document.addEventListener('mouseover',enter);
+  document.addEventListener('mouseout',leave);
+  document.addEventListener('focusin',enter);
+  document.addEventListener('focusout',leave);
+  card.addEventListener('mouseenter',()=>clearTimeout(wikiHideTimer));
+  card.addEventListener('mouseleave',hideWiki);
+}
+
+/* ---------- TMDB auto-fill ---------- */
+const TMDB_KEY_STORE='screen-notes-tmdb-key';
+function tmdbKey(){ try{ return localStorage.getItem(TMDB_KEY_STORE)||""; }catch(e){ return ""; } }
+function setTmdbKey(k){ try{ localStorage.setItem(TMDB_KEY_STORE,(k||"").trim()); }catch(e){} }
+function tmdbIsV4(key){ return /^eyJ/.test((key||"").trim()); }
+function tmdbGet(path,params){
+  const key=tmdbKey().trim();
+  const v4=tmdbIsV4(key);
+  const usp=new URLSearchParams(params||{});
+  if(!v4) usp.set('api_key',key);
+  const url=`https://api.themoviedb.org/3/${path}?${usp.toString()}`;
+  const opts=v4?{headers:{Authorization:'Bearer '+key,accept:'application/json'}}:undefined;
+  return fetch(url,opts);
+}
+function tmdbStatus(msg,kind){
+  const el=document.getElementById('tmdb-status');
+  if(el){ el.textContent=msg||""; el.className='tmdb-status'+(kind?' '+kind:''); }
+}
+function showKeyPanel(show){ const p=document.getElementById('tmdb-key-panel'); if(p) p.style.display=show?'block':'none'; }
+function saveTmdbKeyFromInput(){
+  const i=document.getElementById('tmdb-key-input');
+  if(i&&i.value.trim()){ setTmdbKey(i.value); showKeyPanel(false); tmdbAutofill(); }
+  else tmdbStatus('Paste a key first.','warn');
+}
+async function tmdbAutofill(){
+  const key=tmdbKey();
+  if(!key){ showKeyPanel(true); tmdbStatus('Auto-fill needs a free TMDB key (one-time setup).'); return; }
+  const titleEl=document.getElementById('f-title');
+  const title=(titleEl?titleEl.value:"").trim();
+  const year=(document.getElementById('f-year')||{}).value?document.getElementById('f-year').value.trim():"";
+  const isTv=(document.getElementById('f-type')||{}).value==='tv';
+  if(!title){ tmdbStatus('Type a title first, then auto-fill.','warn'); return; }
+  tmdbStatus('Searching TMDB…');
+  try{
+    const kind=isTv?'tv':'movie';
+    const params={query:title};
+    if(year) params[isTv?'first_air_date_year':'year']=year;
+    const sRes=await tmdbGet(`search/${kind}`,params);
+    if(sRes.status===401){ tmdbStatus('TMDB rejected that key — check it and re-enter.','warn'); showKeyPanel(true); return; }
+    if(!sRes.ok) throw new Error('search http '+sRes.status);
+    const sData=await sRes.json();
+    const hit=(sData.results||[])[0];
+    if(!hit){ tmdbStatus('No TMDB match — check the title/year, or fill manually.','warn'); return; }
+    tmdbStatus(`Found “${hit.title||hit.name}” — loading details…`);
+    const dRes=await tmdbGet(`${kind}/${hit.id}`,{append_to_response:'credits'});
+    if(!dRes.ok) throw new Error('details http '+dRes.status);
+    const d=await dRes.json();
+    applyTmdb(d,isTv);
+    let extraNote='';
+    if(isTv){
+      const dirEl=document.getElementById('f-director');
+      if(dirEl&&!dirEl.value.trim()){
+        tmdbStatus('No show-level director — checking episode credits…');
+        try{
+          const dirs=await tmdbTvDirectors(hit.id);
+          const placed=dirs.slice(0,4);
+          if(placed.length){
+            dirEl.value=placed.map(x=>x.name).join(', ');
+            if(placed.length>1) extraNote=' Directors are the most frequent across episodes — trim as you like.';
+          }
+        }catch(_){}
+      }
+    }
+    tmdbStatus('Filled from TMDB — review, then save. Your thoughts and rating are untouched.'+extraNote,'ok');
+  }catch(e){
+    tmdbStatus('Couldn’t reach TMDB. It needs internet, and some browsers block it when the page is opened as a local file. You can still fill everything manually.','warn');
+  }
+}
+async function tmdbTvDirectors(id){
+  const r=await tmdbGet(`tv/${id}/aggregate_credits`,{});
+  if(!r.ok) return [];
+  const crew=((await r.json()).crew)||[];
+  const dirs=[];
+  for(const p of crew){
+    const dj=(p.jobs||[]).find(j=>j.job==='Director');
+    if(dj&&p.name) dirs.push({name:p.name,eps:dj.episode_count||0});
+  }
+  dirs.sort((a,b)=>b.eps-a.eps);
+  return dirs;
+}
+function applyTmdb(d,isTv){
+  const set=(id,val)=>{ const el=document.getElementById(id); if(el&&val!=null&&val!=='') el.value=val; };
+  const setMoney=(id,n)=>{ const el=document.getElementById(id); if(el&&n) el.value=fmtMoney(n).replace('$',''); };
+  const uniq=a=>[...new Set(a)];
+  const names=arr=>(arr||[]).map(p=>p.name).filter(Boolean);
+  const credits=d.credits||{}; const crew=credits.crew||[]; const cast=credits.cast||[];
+  set('f-title',d.title||d.name);
+  const date=d.release_date||d.first_air_date||"";
+  if(date) set('f-year',date.slice(0,4));
+  if(isTv){
+    if(d.number_of_seasons) set('f-seasons',d.number_of_seasons);
+    if(d.number_of_episodes) set('f-episodes',d.number_of_episodes);
+    if(d.episode_run_time&&d.episode_run_time[0]) set('f-runtime',d.episode_run_time[0]);
+  }else{
+    if(d.runtime) set('f-runtime',d.runtime);
+    setMoney('f-budget',d.budget);
+    setMoney('f-boxoffice',d.revenue);
+  }
+  const country=(d.production_countries&&d.production_countries[0]&&d.production_countries[0].name)
+    ||(d.origin_country&&d.origin_country[0])||"";
+  set('f-country',country);
+  const lang=(d.spoken_languages&&d.spoken_languages[0]&&(d.spoken_languages[0].english_name||d.spoken_languages[0].name))||"";
+  set('f-language',lang);
+  const directors=isTv?[]:names(crew.filter(c=>c.job==='Director'));
+  let writers=uniq(names(crew.filter(c=>c.department==='Writing'||['Writer','Screenplay','Story','Teleplay'].includes(c.job))));
+  if(isTv) writers=uniq(names(d.created_by).concat(writers));
+  const producers=uniq(names(crew.filter(c=>c.job==='Producer'||c.job==='Executive Producer'))).slice(0,6);
+  if(directors.length) set('f-director',directors.join(', '));
+  if(writers.length) set('f-writers',writers.slice(0,6).join(', '));
+  if(producers.length) set('f-producers',producers.join(', '));
+  const studios=isTv?names(d.networks).concat(names(d.production_companies)):names(d.production_companies);
+  if(studios.length) set('f-studios',uniq(studios).slice(0,4).join(', '));
+  const genres=names(d.genres);
+  if(genres.length) set('f-genres',genres.join(', '));
+  if(d.overview) set('f-synopsis',d.overview);
+  if(d.poster_path){
+    set('f-poster','https://image.tmdb.org/t/p/w500'+d.poster_path);
+    const pv=document.getElementById('f-poster-preview');
+    if(pv){ pv.src='https://image.tmdb.org/t/p/w500'+d.poster_path; pv.style.display='block'; }
+  }
+  const castLines=cast.slice(0,8).map(c=>{
+    const ch=c.character||(c.roles&&c.roles[0]&&c.roles[0].character)||"";
+    return ch?`${c.name} — ${ch}`:c.name;
+  }).filter(Boolean);
+  if(castLines.length){ const el=document.getElementById('f-cast'); if(el) el.value=castLines.join('\n'); }
+}
+
+/* ---------- anime dub cast (Jikan / MyAnimeList) ---------- */
+function dubStatus(msg,kind){
+  const el=document.getElementById('dub-status');
+  if(el){ el.textContent=msg||""; el.className='dub-status'+(kind?' '+kind:''); }
+}
+function flipName(n){
+  n=(n||"").trim();
+  if(n.includes(', ')){ const i=n.indexOf(', '); return (n.slice(i+2)+' '+n.slice(0,i)).trim(); }
+  return n;
+}
+async function jikanGet(url,tries=3){
+  let wait=1200;
+  for(let attempt=1;;attempt++){
+    let res;
+    try{ res=await fetch(url); }
+    catch(netErr){ const e=new Error('network'); e.kind='network'; throw e; }
+    if(res.ok) return res;
+    if((res.status===429||res.status>=500)&&attempt<tries){
+      dubStatus(`Anime database is busy — retrying (${attempt}/${tries-1})…`);
+      await new Promise(r=>setTimeout(r,wait)); wait=Math.round(wait*1.8); continue;
+    }
+    const e=new Error('http '+res.status);
+    e.kind=res.status===429?'rate':(res.status>=500?'server':'http'); e.status=res.status; throw e;
+  }
+}
+async function animeDubCast(){
+  const title=((document.getElementById('f-title')||{}).value||"").trim();
+  const year=((document.getElementById('f-year')||{}).value||"").trim();
+  if(!title){ dubStatus('Type the title first, then fetch the dub cast.','warn'); return; }
+  dubStatus('Searching the anime database…');
+  try{
+    const sRes=await jikanGet(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=6`);
+    const list=((await sRes.json()).data)||[];
+    if(!list.length){ dubStatus('No anime match — check the title, or enter cast by hand.','warn'); return; }
+    let hit=list[0];
+    if(year){
+      const byYear=list.find(a=>a.aired&&a.aired.from&&String(a.aired.from).slice(0,4)===String(year));
+      if(byYear) hit=byYear;
+    }
+    dubStatus(`Found “${hit.title}” — loading voice cast…`);
+    await new Promise(r=>setTimeout(r,1000));
+    const cRes=await jikanGet(`https://api.jikan.moe/v4/anime/${hit.mal_id}/characters`);
+    let chars=((await cRes.json()).data)||[];
+    if(!chars.length){ dubStatus('That title has no character data on file.','warn'); return; }
+    chars=chars.slice().sort((a,b)=>(a.role==='Main'?0:1)-(b.role==='Main'?0:1));
+    const lines=[];
+    for(const c of chars){
+      const charName=flipName(c.character&&c.character.name);
+      const vas=c.voice_actors||[];
+      const jp=vas.find(v=>v.language==='Japanese');
+      const en=vas.find(v=>v.language==='English');
+      const jpN=jp?flipName(jp.person.name):"";
+      const enN=en?flipName(en.person.name):"";
+      let who;
+      if(jpN&&enN) who=`${jpN}/${enN}`;
+      else if(jpN) who=jpN;
+      else if(enN) who=enN;
+      else continue;
+      if(charName) lines.push(`${who} — ${charName} (voice)`);
+      if(lines.length>=14) break;
+    }
+    if(!lines.length){ dubStatus('Found the title but no usable voice-actor data.','warn'); return; }
+    document.getElementById('f-cast').value=lines.join('\n');
+    const dubbed=lines.filter(l=>l.includes('/')).length;
+    dubStatus(dubbed
+      ?`Filled ${lines.length} roles — ${dubbed} with an English dub actor paired in.`
+      :`Filled ${lines.length} roles. No English dub is listed for this title yet.`,'ok');
+  }catch(e){
+    if(e.kind==='rate') dubStatus('The anime database is rate-limiting us — wait ~15 seconds, then try again.','warn');
+    else if(e.kind==='server') dubStatus('The anime database is having server trouble right now. Try again in a moment.','warn');
+    else if(e.kind==='http') dubStatus(`The anime database returned an error (status ${e.status}). Try again, or enter cast by hand.`,'warn');
+    else dubStatus('Couldn’t reach the anime database — check your internet connection. (Opening the page as a local file can also block it.) Enter cast manually if needed.','warn');
+  }
+}
+
+/* ============================================================
+   PWA + BOOT
+   ============================================================ */
+function registerSW(){
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+  }
+}
+window.addEventListener('online', ()=>{ if(!Sync.connected) Sync.connect(false).catch(()=>updateSyncBar()); else Sync.push(); });
+
+function boot(){
+  registerSW();
+  Storage.loadLocal();   // instant render from local cache (works offline)
+  bindWikiHover();
+  render();
+  initGis();             // then connect to Drive in the background
+}
+boot();
+</script>
+</body>
+</html>
